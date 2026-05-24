@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Self-Supervised Learning for CNN-Transformer Hybrids</title>
+    <style>
+      :root {
+        --primary: #7a1c2c; /* University Academic Maroon */
+        --secondary: #2c3e50; /* Slate Blue */
+        --accent: #e67e22; /* Highlight Orange */
+        --bg-light: #f8f9fa;
+        --text-dark: #2c3e50;
+        --text-muted: #7f8c8d;
+        --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-light);
+        color: var(--text-dark);
+        line-height: 1.6;
+      }
+
+      header {
+        background: linear-gradient(135deg, var(--primary), #52131e);
+        color: white;
+        padding: 4rem 2rem;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+      }
+
+      .paper-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        letter-spacing: -0.5px;
+        line-height: 1.3;
+      }
+
+      .affiliation {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        font-style: italic;
+        font-weight: 300;
+        letter-spacing: 0.5px;
+      }
+
+      .project-intro {
+        background: #ebf5fb;
+        border-left: 5px solid #2980b9;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-radius: 4px;
+      }
+
+      .project-intro h3 {
+        color: #2980b9;
+        margin-bottom: 0.5rem;
+        font-size: 1.2rem;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        margin-top: 2rem;
+      }
+
+      @media (min-width: 768px) {
+        .grid-2 {
+          grid-template-columns: 1.2fr 0.8fr;
+        }
+      }
+
+      .card {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 2rem;
+        border-top: 4px solid var(--primary);
+      }
+
+      .card.secondary-theme {
+        border-top-color: var(--secondary);
+      }
+
+      h2 {
+        color: var(--secondary);
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-bottom: 2px solid #eaeded;
+        padding-bottom: 0.5rem;
+      }
+
+      h3 {
+        color: var(--primary);
+        font-size: 1.15rem;
+        margin: 1.5rem 0 0.5rem 0;
+      }
+
+      p {
+        margin-bottom: 1.2rem;
+        color: #34495e;
+        text-align: justify;
+      }
+
+      .figure-container {
+        background: #ffffff;
+        border: 1px solid #e1e4e6;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1.5rem 0;
+        text-align: center;
+      }
+
+      .figure-img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+      }
+
+      .figure-caption {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 0.75rem;
+        font-style: italic;
+      }
+
+      .contribution-list {
+        list-style: none;
+        padding-left: 0;
+      }
+
+      .contribution-list li {
+        position: relative;
+        padding-left: 2rem;
+        margin-bottom: 1rem;
+        text-align: justify;
+      }
+
+      .contribution-list li::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        top: 0;
+        color: var(--accent);
+        font-weight: bold;
+        font-size: 1.2rem;
+      }
+
+      .math-block {
+        background: #f4f6f6;
+        font-family: "Courier New", Courier, monospace;
+        padding: 1rem;
+        border-radius: 6px;
+        margin: 1rem 0;
+        font-weight: bold;
+        color: var(--primary);
+        overflow-x: auto;
+      }
+
+      .tag-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+
+      .tag {
+        background: #eaecee;
+        color: var(--secondary);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.5rem 0;
+      }
+
+      th,
+      td {
+        padding: 0.75rem;
+        text-align: center;
+        border-bottom: 1px solid #eaeded;
+      }
+
+      th {
+        background-color: #f4f6f6;
+        color: var(--secondary);
+        font-weight: 600;
+      }
+
+      .research-team-card {
+        background: #fff;
+        border: 1px solid #eaeded;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+      }
+
+      .team-member-group {
+        flex: 1;
+        min-width: 250px;
+      }
+
+      .team-member-group h4 {
+        color: var(--secondary);
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid #eaeded;
+        padding-bottom: 0.25rem;
+      }
+
+      .member-name {
+        font-weight: 600;
+        color: var(--text-dark);
+      }
+
+      .member-email {
+        font-size: 0.9rem;
+        color: #2980b9;
+        text-decoration: none;
+      }
+
+      footer {
+        text-align: center;
+        padding: 2.5rem;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        border-top: 1px solid #eaeded;
+        margin-top: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <h1 class="paper-title">
+          Self-Supervised Learning for CNN-Transformer Hybrids under Parameter
+          and Label Constraints
+        </h1>
+        <div class="affiliation">
+          Department of Computer Engineering, University of Peradeniya, Kandy,
+          Sri Lanka
+        </div>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="project-intro">
+        <h3>Project Overview</h3>
+        <p style="margin: 0">
+          This research develops a lightweight, patch-level, multi-pretext
+          self-supervised learning framework engineered specifically for tiny
+          hybrid CNN-Transformer architectures. It establishes an optimization
+          strategy to build visual representations within a strict 1-Million
+          parameter limit using unlabelled data under severe downstream label
+          starvation.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>Abstract</h2>
+        <p>
+          Self-supervised learning (SSL) has demonstrated strong
+          representational power for large Vision Transformers trained on
+          massive datasets, yet its applicability to tiny hybrid CNN-Transformer
+          architectures under strict parameter limitations and downstream
+          label-scarce conditions remains largely unexplored. This paper
+          proposes a novel multi-pretext SSL methodology that simultaneously app
+          token masking and token rotation corruption to the same latent token
+          sequence within a single forward pass. The pipeline introduces three
+          contributions not previously combined: joint, non-overlapping dual
+          corruption that forces the encoder to resolve co-existing corruptions
+          simultaneously, a Dynamic Corruption Scheduler that adapts mask and
+          rotation ratios per step via an exponential moving average (EMA) of
+          per-task loss magnitudes and a gradient-reversal disentanglement loss
+          that explicitly penalises cross-task feature leakage between the
+          reconstruction and rotation heads.
+        </p>
+        <div class="tag-container">
+          <span class="tag">Self-Supervised Learning</span>
+          <span class="tag">Multi-Pretext Tasks</span>
+          <span class="tag">Tiny Hybrid Architectures</span>
+          <span class="tag">TinyNeXt</span>
+          <span class="tag">Resource-Constrained Learning</span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="card">
+            <h2>I. Introduction & Motivation</h2>
+            <p>
+              Modern computer vision milestones heavily rely on massive backbone
+              architectures and large server-scale compute profiles. This sets
+              up a fundamental mismatch with edge deployment targets like
+              microcontrollers and IoT nodes working under memory and hardware
+              ceilings.
+            </p>
+            <p>
+              While edge-scale hybrid configurations like TinyNeXt handle
+              supervised accuracy-efficiency trade-offs securely under 1 M
+              parameters, their architectural compatibility with un-pretrained
+              SSL frameworks remained completely uncharacterized. This framework
+              addresses this gap with zero reliance on costly external graph
+              architectures or deep attention layers.
+            </p>
+          </div>
+
+          <div class="card">
+            <h2>II. Core Methodology Components</h2>
+            <p>
+              The system operates around an asymmetric encoder-decoder design.
+              The encoder utilizes a randomly initialized TinyNeXt-T backbone,
+              while the decoder serves as a temporary, lightweight two-layer
+              Transformer trunk containing two standalone task heads.
+            </p>
+
+            <div class="figure-container">
+              <img
+                src="./images/architecture.png"
+                alt="System Architecture Diagram"
+                class="figure-img"
+              />
+              <div class="figure-caption">
+                Fig. 1. Architectural overview. The Dynamic Corruption Scheduler
+                adaptively optimizes token splitting within the Joint Corruption
+                Block before features enter the Transformer decoder trunk.
+              </div>
+            </div>
+
+            <h3>A. Joint Corruption Block</h3>
+            <p>
+              The baseline token sequences are split into completely disjoint,
+              non-overlapping manipulation blocks within a single forward pass
+              to rule out supervisory feedback ambiguities:
+            </p>
+            <div class="math-block">
+              n_m = ⌊N · r_m⌋ &nbsp;&nbsp; [Masked Tokens Set]<br />
+              n_r = ⌊(N - n_m) · r_r⌋ &nbsp;&nbsp; [Rotated Tokens Set]
+            </div>
+            <p>
+              Masked subsets map to a learnable mask embedding space, while
+              rotated components encounter a cyclic feature-dimension rolling
+              sequence.
+            </p>
+
+            <h3>B. Dynamic Corruption Scheduler</h3>
+            <p>
+              To keep basic pretext tasks from over-running the collaborative
+              gradient signals, an exponential moving average tracker scales
+              task weights relative to ongoing loss challenge dynamics:
+            </p>
+            <div class="math-block">
+              r_m = clip( ℓ_m / (ℓ_m + ℓ_r), 0.25, 0.5 )<br />
+              r_r = clip( ℓ_r / (ℓ_m + ℓ_r), 0.25, 0.5 )
+            </div>
+
+            <div class="figure-container">
+              <img
+                src="./images/image_1528c8.png"
+                alt="Dynamic Corruption Scheduler Training Log"
+                class="figure-img"
+              />
+              <div class="figure-caption">
+                Fig. 2. Pre-training execution snapshot monitoring adaptive mask
+                and rotation allocation ratios across training steps.
+              </div>
+            </div>
+            <p>
+              As shown in the runtime validation log above, the scheduler
+              actively monitors loss fluctuations to re-balance mask budgets and
+              structural modification targets at regular sequence steps,
+              ensuring smooth multi-task training convergence.
+            </p>
+
+            <h3>C. Multi-Task Dynamic Loss Formulation</h3>
+            <p>
+              The complete configuration dynamically balances total
+              backpropagation objectives through an adaptive joint weighting
+              mechanism calculated at each operational step $t$:
+            </p>
+            <div class="math-block">
+              L(t) = λ_1(t) · L_recon + λ_2(t) · L_rot + λ_3 · L_disent
+            </div>
+            <p>
+              The task weights $\lambda_1(t)$ and $\lambda_2(t)$ are adaptively
+              balanced using exponential moving averages of their independent
+              task-specific losses to prevent trivial optimization
+              short-circuiting. The disentanglement weight $\lambda_3$ handles
+              cross-task feature leaks across heads using an adversarial
+              objective driven by a Gradient Reversal Layer (GRL).
+            </p>
+
+            <div class="figure-container">
+              <img
+                src="./images/decoder.png"
+                alt="Shared Decoder Pipeline"
+                class="figure-img"
+              />
+              <div class="figure-caption">
+                Fig. 3. Shared decoder pipeline. Features branch out into
+                independent reconstruction and rotation heads to balance primary
+                tasks alongside adversarial gradient-reversal penalties.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card secondary-theme">
+            <h2>Key Structural Contributions</h2>
+            <ul class="contribution-list">
+              <li>
+                <strong>Joint, Non-Overlapping Dual Corruption:</strong>
+                Disjoint token partitioning allows multiple pretext tasks to
+                converge without conflict inside a single training step.
+              </li>
+              <li>
+                <strong>Dynamic Scheduler & Multi-Task Loss:</strong> Adapts
+                mask, token allocation, and gradient loss bounds dynamically on
+                the fly by balancing EMA-tracked loss paths.
+              </li>
+              <li>
+                <strong>Gradient-Reversal Penalty:</strong> Encourages the
+                system to form cleaner, structurally decoupled representation
+                layers.
+              </li>
+            </ul>
+          </div>
+
+          <div class="card secondary-theme">
+            <h2>Experimental Configuration</h2>
+            <p>
+              <strong>Encoder Backbone:</strong> TinyNeXt-T configured with 1 M
+              parameters and a feature dimension of D = 192.
+            </p>
+            <p>
+              <strong>Decoder Block:</strong> A light 2-layer trunk containing 8
+              attention heads, entirely discarded at the end of the pre-training
+              loop.
+            </p>
+            <p>
+              <strong>Downstream Evaluation Protocol:</strong> Tested across
+              CIFAR-10 and Tiny-ImageNet using linear probing restrictions. The
+              model is intentionally restricted to an extreme label starvation
+              budget of only 20% available dataset labels during downstream
+              fine-tuning steps.
+            </p>
+          </div>
+
+          <div class="card secondary-theme">
+            <h2>III. Results & Evaluation</h2>
+            <p>
+              Downstream linear probe classification performance under severe
+              target label starvation constraints:
+            </p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>CIFAR-10 Accuracy</th>
+                  <th>Tiny-ImageNet Accuracy</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Proposed Pipeline (Ours)</strong></td>
+                  <td><strong>60.01%</strong></td>
+                  <td><strong>11.23%</strong></td>
+                </tr>
+                <tr>
+                  <td>Random Guessing Baseline</td>
+                  <td>10.00%</td>
+                  <td>0.50%</td>
+                </tr>
+                <tr>
+                  <td>EMP-SSL (Server Scale)</td>
+                  <td>91.50%</td>
+                  <td>51.50%</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="figure-container">
+              <img
+                src="./images/image_1528a4.png"
+                alt="Performance Gap Visualisation Charts"
+                class="figure-img"
+              />
+              <div class="figure-caption">
+                Fig. 4. Downstream top-1 accuracy validation charts showcasing
+                learned optimization tiers against random profiles.
+              </div>
+            </div>
+
+            <p
+              style="margin-top: 1rem; font-size: 0.95rem; text-align: justify"
+            >
+              <strong>Analysis of Feature Utility:</strong> Downstream
+              evaluation demonstrates that the proposed pipeline successfully
+              extracts substantial, non-trivial semantic features under severe
+              label starvation. On CIFAR-10, our method reaches
+              <strong>60.01% accuracy</strong>, vastly outperforming the random
+              choice baseline of 10.00%. On Tiny-ImageNet, it recovers
+              <strong>11.23% accuracy</strong> against a random baseline of
+              0.50%. This demonstrates clear representational capabilities far
+              superior to random chance, providing an initial baseline for
+              edge-scale SSL design constraints under severe parameter capacity
+              walls.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="research-team-card">
+        <div class="team-member-group">
+          <h4>Research Team</h4>
+          <p style="margin: 0">
+            <span class="member-name">S. Munasinghe</span> (e20259)<br />
+            <a href="mailto:e20259@eng.pdn.ac.lk" class="member-email"
+              >e20259@eng.pdn.ac.lk</a
+            >
+          </p>
+        </div>
+        <div class="team-member-group">
+          <h4>Supervision</h4>
+          <p style="margin: 0">
+            <span class="member-name">Dr. Sampath Deegalla</span><br />
+            <a href="mailto:e20259@eng.pdn.ac.lk" class="member-email"
+              >sampath@eng.pdn.ac.lk</a
+            >
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
